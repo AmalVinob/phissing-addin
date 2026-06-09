@@ -258,7 +258,7 @@
       // Production mode — call Azure Function
       fetch(AZURE_FUNCTION_URL, {
         method:  "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain" },
         body:    JSON.stringify(payload)
       })
       .then(function(r) {
