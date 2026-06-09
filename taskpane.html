@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Suspicious Email</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+      background: #ffffff;
+      color: #1f1f1f;
+      padding: 20px 18px;
+    }
+    .header {
+      text-align: center;
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .brand {
+      font-size: 11px;
+      font-weight: 700;
+      color: #c0392b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-top: 4px;
+    }
+    .info {
+      font-size: 12px;
+      color: #0078d4;
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+    .email-preview {
+      background: #f4f8fc;
+      border: 1px solid #d0dce8;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      font-size: 12px;
+      color: #333;
+    }
+    .email-preview .row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+    .email-preview .lbl {
+      font-weight: 600;
+      color: #0078d4;
+      min-width: 52px;
+      flex-shrink: 0;
+    }
+    .email-preview .val {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #333;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .radio-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .radio-option input { accent-color: #0078d4; width: 14px; height: 14px; cursor: pointer; }
+    textarea {
+      width: 100%;
+      height: 85px;
+      padding: 8px 10px;
+      border: 1px solid #c8c8c8;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      background: #fafafa;
+      color: #1f1f1f;
+      transition: border-color 0.15s;
+      margin-bottom: 14px;
+    }
+    textarea:focus { outline: none; border-color: #0078d4; background: #fff; }
+    textarea::placeholder { color: #aaa; }
+    .btn-report {
+      width: 100%;
+      padding: 9px;
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-report:hover:not(:disabled) { background: #106ebe; }
+    .btn-report:disabled { background: #a8cfed; cursor: not-allowed; }
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.5;
+      display: none;
+    }
+    .status.success { display:block; background:#dff0d8; color:#2d6a2d; border:1px solid #b2d8b2; }
+    .status.error   { display:block; background:#fde8e8; color:#8b1a1a; border:1px solid #f5b8b8; }
+    .status.loading { display:block; background:#fff3cd; color:#856404; border:1px solid #ffe08a; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="brand">CPX Security</div>
+    <h1>Report Suspicious Email</h1>
+  </div>
+
+  <p class="info">
+    This report will be sent to the CPX Security team
+    and analysed by the AI phishing triage agent (AGT-CSD-006).
+  </p>
+
+  <div class="email-preview" id="email-preview" style="display:none">
+    <div class="row"><span class="lbl">From:</span><span class="val" id="prev-from"></span></div>
+    <div class="row"><span class="lbl">Subject:</span><span class="val" id="prev-subject"></span></div>
+    <div class="row"><span class="lbl">Files:</span><span class="val" id="prev-attach"></span></div>
+  </div>
+
+  <div class="section-label">Category</div>
+  <div class="radio-row">
+    <label class="radio-option">
+      <input type="radio" name="cat" value="Phish"> Phish
+    </label>
+    <label class="radio-option">
+      <input type="radio" name="cat" value="Spam"> Spam
+    </label>
+    <label class="radio-option">
+      <input type="radio" name="cat" value="Other" checked> Other
+    </label>
+  </div>
+
+  <div class="section-label">Additional notes</div>
+  <textarea id="msg" placeholder="Anything unusual you noticed about this email…"></textarea>
+
+  <button class="btn-report" id="btn" onclick="submitReport()">Report</button>
+  <div class="status" id="status"></div>
+
+  <script>
+    // ── CONFIG ──────────────────────────────────────────────────
+    // Set this to your Azure Function URL when ready.
+    // Leave empty ("") for POC demo mode — shows simulated success.
+    const AZURE_FUNCTION_URL = "";
+    // ────────────────────────────────────────────────────────────
+
+    let emailData = {};
+
+    Office.onReady(function(info) {
+      if (info.host === Office.HostType.Outlook) {
+        loadEmailData();
+      }
+    });
+
+    function loadEmailData() {
+      const item = Office.context.mailbox.item;
+      const profile = Office.context.mailbox.userProfile;
+
+      emailData = {
+        reporter:       profile.emailAddress,
+        reporterName:   profile.displayName,
+        messageId:      item.internetMessageId,
+        conversationId: item.conversationId,
+        subject:        item.subject,
+        dateReceived:   item.dateTimeCreated ? item.dateTimeCreated.toISOString() : null,
+        from: {
+          name:  item.from ? item.from.displayName  : null,
+          email: item.from ? item.from.emailAddress : null
+        },
+        to:          (item.to  || []).map(r => ({ name: r.displayName, email: r.emailAddress })),
+        cc:          (item.cc  || []).map(r => ({ name: r.displayName, email: r.emailAddress })),
+        attachments: (item.attachments || []).map(a => ({
+          name: a.name, size: a.size, contentType: a.contentType, isInline: a.isInline
+        }))
+      };
+
+      // Show preview card
+      document.getElementById("prev-from").textContent =
+        emailData.from.name ? emailData.from.name + " <" + emailData.from.email + ">" : emailData.from.email || "—";
+      document.getElementById("prev-subject").textContent   = emailData.subject || "(no subject)";
+      document.getElementById("prev-attach").textContent    =
+        emailData.attachments.length ? emailData.attachments.map(a => a.name).join(", ") : "None";
+      document.getElementById("email-preview").style.display = "block";
+
+      // Get body HTML (for URL extraction by agent)
+      item.body.getAsync(Office.CoercionType.Html, function(r) {
+        if (r.status === Office.AsyncResultStatus.Succeeded) emailData.bodyHtml = r.value;
+      });
+
+      // Get all internet headers (SPF / DKIM / DMARC)
+      if (item.getAllInternetHeadersAsync) {
+        item.getAllInternetHeadersAsync(function(r) {
+          if (r.status === Office.AsyncResultStatus.Succeeded) emailData.internetHeaders = r.value;
+        });
+      }
+    }
+
+    function submitReport() {
+      const category    = document.querySelector('input[name="cat"]:checked').value;
+      const userComment = document.getElementById("msg").value.trim();
+      const btn         = document.getElementById("btn");
+
+      btn.disabled = true;
+      showStatus("loading", "Submitting report…");
+
+      const payload = {
+        reportedAt:  new Date().toISOString(),
+        source:      "outlook_addin",
+        category:    category,
+        userComment: userComment,
+        email:       emailData
+      };
+
+      // POC demo mode — no Azure Function configured yet
+      if (!AZURE_FUNCTION_URL) {
+        setTimeout(function() {
+          showStatus("success",
+            "✓ Report submitted (POC demo mode). " +
+            "Category: " + category + ". " +
+            "In production this triggers AGT-CSD-006 phishing triage."
+          );
+          btn.textContent = "Reported ✓";
+          btn.style.background = "#2d7d2d";
+          console.log("POC payload:", JSON.stringify(payload, null, 2));
+        }, 800);
+        return;
+      }
+
+      // Production mode — call Azure Function
+      fetch(AZURE_FUNCTION_URL, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload)
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error("Server error " + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        showStatus("success",
+          "✓ Report submitted (ID: " + (data.reportId || "—") + "). " +
+          "The security team has been notified."
+        );
+        btn.textContent = "Reported ✓";
+        btn.style.background = "#2d7d2d";
+      })
+      .catch(function(err) {
+        showStatus("error",
+          "Failed to submit: " + err.message + ". " +
+          "Please forward to security@cpx.ae as fallback."
+        );
+        btn.disabled = false;
+      });
+    }
+
+    function showStatus(type, msg) {
+      var d = document.getElementById("status");
+      d.className = "status " + type;
+      d.textContent = msg;
+    }
+  </script>
+
+</body>
+</html>
