@@ -4,173 +4,464 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Report Suspicious Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
+    :root {
+      --dark-purple:   #1E1B47;
+      --bright-purple: #5650CD;
+      --near-black:    #040405;
+      --just-grey:     #333333;
+      --cpx-green:     #40E176;
+      --accent-blue:   #3AC2FF;
+      --accent-red:    #FF3666;
+      --bg:            #F4F4F8;
+      --card-bg:       #FFFFFF;
+      --border:        #E2E2EC;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 14px;
-      background: #ffffff;
-      color: #1f1f1f;
-      padding: 20px 18px;
-    }
-    .header {
-      text-align: center;
-      padding-bottom: 14px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid #e5e5e5;
-    }
-    .brand {
-      font-size: 11px;
-      font-weight: 700;
-      color: #c0392b;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      color: #1a1a2e;
-      margin-top: 4px;
-    }
-    .info {
-      font-size: 12px;
-      color: #0078d4;
-      line-height: 1.55;
-      margin-bottom: 18px;
-    }
-    .email-preview {
-      background: #f4f8fc;
-      border: 1px solid #d0dce8;
-      border-radius: 6px;
-      padding: 10px 12px;
-      margin-bottom: 18px;
-      font-size: 12px;
-      color: #333;
-    }
-    .email-preview .row {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--just-grey);
+      min-height: 100vh;
       display: flex;
-      gap: 6px;
-      margin-bottom: 3px;
+      flex-direction: column;
     }
-    .email-preview .lbl {
-      font-weight: 600;
-      color: #0078d4;
-      min-width: 52px;
+
+    /* ── Header ───────────────────────────────────────────── */
+    .header {
+      background: var(--dark-purple);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
       flex-shrink: 0;
     }
+
+    /* decorative orbs */
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -28px; right: -28px;
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: rgba(86, 80, 205, 0.28);
+      pointer-events: none;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -18px; right: 50px;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: rgba(64, 225, 118, 0.14);
+      pointer-events: none;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-text {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 17px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: 0.3px;
+      line-height: 1.15;
+    }
+
+    .brand-text .green { color: var(--cpx-green); }
+
+    .brand-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-title {
+      position: relative;
+      z-index: 1;
+      margin-top: 13px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Content ──────────────────────────────────────────── */
+    .content {
+      padding: 15px 16px;
+      flex: 1;
+    }
+
+    /* info bar */
+    .info-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(86, 80, 205, 0.07);
+      border-left: 3px solid var(--bright-purple);
+      border-radius: 0 5px 5px 0;
+      padding: 9px 11px;
+      margin-bottom: 14px;
+      font-size: 11.5px;
+      color: var(--bright-purple);
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .info-bar svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* email preview card */
+    .email-preview {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 13px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 4px rgba(30,27,71,0.07);
+    }
+
+    .preview-header {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--bright-purple);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .email-preview .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 5px;
+      align-items: baseline;
+    }
+    .email-preview .row:last-child { margin-bottom: 0; }
+
+    .email-preview .lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: #9090b0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 48px;
+      flex-shrink: 0;
+    }
+
     .email-preview .val {
+      font-size: 12px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #333;
+      color: var(--just-grey);
+      font-weight: 500;
     }
+
+    /* section labels */
     .section-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      color: #666;
+      color: #8888aa;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      letter-spacing: 1px;
+      margin-bottom: 9px;
     }
-    .radio-row {
+
+    /* category cards */
+    .radio-group {
       display: flex;
-      gap: 20px;
-      margin-bottom: 18px;
+      gap: 7px;
+      margin-bottom: 15px;
     }
-    .radio-option {
+
+    .radio-card {
+      flex: 1;
+      position: relative;
+    }
+
+    .radio-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+
+    .radio-card label {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      padding: 9px 4px 8px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9090aa;
+      transition: all 0.15s ease;
+      text-align: center;
+      user-select: none;
     }
-    .radio-option input { accent-color: #0078d4; width: 14px; height: 14px; cursor: pointer; }
+
+    .radio-card label svg { transition: all 0.15s ease; }
+
+    /* Phish — red */
+    .radio-card input:checked + label.phish {
+      border-color: var(--accent-red);
+      background: rgba(255,54,102,0.06);
+      color: var(--accent-red);
+      box-shadow: 0 0 0 3px rgba(255,54,102,0.12);
+    }
+    .radio-card input:checked + label.phish svg { stroke: var(--accent-red); }
+
+    /* Spam — amber */
+    .radio-card input:checked + label.spam {
+      border-color: #F5A623;
+      background: rgba(245,166,35,0.07);
+      color: #b07a00;
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.15);
+    }
+    .radio-card input:checked + label.spam svg { stroke: #F5A623; }
+
+    /* Other — purple */
+    .radio-card input:checked + label.other {
+      border-color: var(--bright-purple);
+      background: rgba(86,80,205,0.07);
+      color: var(--bright-purple);
+      box-shadow: 0 0 0 3px rgba(86,80,205,0.12);
+    }
+    .radio-card input:checked + label.other svg { stroke: var(--bright-purple); }
+
+    /* textarea */
     textarea {
       width: 100%;
-      height: 85px;
-      padding: 8px 10px;
-      border: 1px solid #c8c8c8;
-      border-radius: 4px;
-      font-size: 13px;
-      font-family: inherit;
+      height: 78px;
+      padding: 9px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-family: 'Inter', sans-serif;
       resize: vertical;
-      background: #fafafa;
-      color: #1f1f1f;
-      transition: border-color 0.15s;
-      margin-bottom: 14px;
+      background: var(--card-bg);
+      color: var(--just-grey);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      margin-bottom: 15px;
+      line-height: 1.5;
     }
-    textarea:focus { outline: none; border-color: #0078d4; background: #fff; }
-    textarea::placeholder { color: #aaa; }
+    textarea:focus {
+      outline: none;
+      border-color: var(--bright-purple);
+      box-shadow: 0 0 0 3px rgba(86,80,205,0.1);
+    }
+    textarea::placeholder { color: #c0c0d0; }
+
+    /* submit button */
     .btn-report {
       width: 100%;
-      padding: 9px;
-      background: #0078d4;
-      color: #fff;
+      padding: 11px 12px;
+      background: var(--cpx-green);
+      color: var(--near-black);
       border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-report:hover:not(:disabled) { background: #106ebe; }
-    .btn-report:disabled { background: #a8cfed; cursor: not-allowed; }
-    .status {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 13px;
-      line-height: 1.5;
-      display: none;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
     }
-    .status.success { display:block; background:#dff0d8; color:#2d6a2d; border:1px solid #b2d8b2; }
-    .status.error   { display:block; background:#fde8e8; color:#8b1a1a; border:1px solid #f5b8b8; }
-    .status.loading { display:block; background:#fff3cd; color:#856404; border:1px solid #ffe08a; }
+    .btn-report:hover:not(:disabled) {
+      background: #30d868;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(64,225,118,0.38);
+    }
+    .btn-report:active:not(:disabled) { transform: translateY(0); }
+    .btn-report:disabled {
+      background: #b8e8cc;
+      color: #5a7a68;
+      cursor: not-allowed;
+    }
+
+    /* status */
+    .status {
+      margin-top: 11px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.55;
+      display: none;
+      font-weight: 500;
+    }
+    .status.success {
+      display: block;
+      background: rgba(64,225,118,0.1);
+      color: #1a6b38;
+      border: 1px solid rgba(64,225,118,0.35);
+    }
+    .status.error {
+      display: block;
+      background: rgba(255,54,102,0.08);
+      color: #8b1a1a;
+      border: 1px solid rgba(255,54,102,0.28);
+    }
+    .status.loading {
+      display: block;
+      background: rgba(86,80,205,0.07);
+      color: var(--bright-purple);
+      border: 1px solid rgba(86,80,205,0.2);
+    }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 10px 16px 13px;
+      font-size: 10px;
+      color: #b0b0c8;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .footer strong { color: #8888aa; }
   </style>
 </head>
 <body>
 
+  <!-- ── Header ── -->
   <div class="header">
-    <div class="brand">CPX Security</div>
-    <h1>Report Suspicious Email</h1>
+    <div class="logo-row">
+      <!-- CPX Shield logo -->
+      <svg width="36" height="40" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M18 2L3 8.5V19C3 27.8 9.8 36 18 38.5C26.2 36 33 27.8 33 19V8.5L18 2Z"
+              fill="rgba(86,80,205,0.22)" stroke="#5650CD" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M18 7L7 12.5V19.5C7 26.2 11.8 32.5 18 35C24.2 32.5 29 26.2 29 19.5V12.5L18 7Z"
+              fill="rgba(64,225,118,0.13)"/>
+        <!-- checkmark -->
+        <path d="M11.5 20L15.5 24L24.5 15" stroke="#40E176" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="brand-text">CPX <span class="green">Security</span></div>
+        <div class="brand-sub">Phishing Report Portal</div>
+      </div>
+    </div>
+    <div class="header-title">Report a Suspicious Email</div>
   </div>
 
-  <p class="info">
-    This report will be sent to the CPX Security team
-    and analysed by the AI phishing triage agent (AGT-CSD-006).
-  </p>
+  <!-- ── Content ── -->
+  <div class="content">
 
-  <div class="email-preview" id="email-preview" style="display:none">
-    <div class="row"><span class="lbl">From:</span><span class="val" id="prev-from"></span></div>
-    <div class="row"><span class="lbl">Subject:</span><span class="val" id="prev-subject"></span></div>
-    <div class="row"><span class="lbl">Files:</span><span class="val" id="prev-attach"></span></div>
+    <!-- Info notice -->
+    <div class="info-bar">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="6" stroke="#5650CD" stroke-width="1.2"/>
+        <path d="M7 6.5V10" stroke="#5650CD" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="7" cy="4.5" r="0.8" fill="#5650CD"/>
+      </svg>
+      Routed to AGT-CSD-006 for AI-powered phishing triage
+    </div>
+
+    <!-- Email preview -->
+    <div class="email-preview" id="email-preview" style="display:none">
+      <div class="preview-header">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <rect x="0.75" y="1.75" width="9.5" height="7.5" rx="1.25" stroke="#5650CD" stroke-width="1.2"/>
+          <path d="M1 3L5.5 6.5L10 3" stroke="#5650CD" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        Selected Email
+      </div>
+      <div class="row"><span class="lbl">From</span><span class="val" id="prev-from"></span></div>
+      <div class="row"><span class="lbl">Subject</span><span class="val" id="prev-subject"></span></div>
+      <div class="row"><span class="lbl">Files</span><span class="val" id="prev-attach"></span></div>
+    </div>
+
+    <!-- Category -->
+    <div class="section-label">Category</div>
+    <div class="radio-group">
+      <div class="radio-card">
+        <input type="radio" name="cat" id="cat-phish" value="Phish">
+        <label for="cat-phish" class="phish">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#9090aa" stroke-width="1.4">
+            <path d="M2 13C4 10 7 8 9 8C11 8 13 9 14 11" stroke-linecap="round"/>
+            <circle cx="14" cy="12" r="2.5"/>
+            <path d="M14 14.5V16.5" stroke-linecap="round"/>
+            <path d="M9 8V5M9 5C9 3.5 10.5 2 12 2" stroke-linecap="round"/>
+          </svg>
+          Phish
+        </label>
+      </div>
+      <div class="radio-card">
+        <input type="radio" name="cat" id="cat-spam" value="Spam">
+        <label for="cat-spam" class="spam">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#9090aa" stroke-width="1.4">
+            <rect x="2" y="3.5" width="14" height="11" rx="1.5"/>
+            <path d="M2 6L9 10.5L16 6" stroke-linecap="round"/>
+            <path d="M6 12.5H8M10 12.5H12" stroke-linecap="round" stroke-width="1.2"/>
+          </svg>
+          Spam
+        </label>
+      </div>
+      <div class="radio-card">
+        <input type="radio" name="cat" id="cat-other" value="Other" checked>
+        <label for="cat-other" class="other">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#9090aa" stroke-width="1.4">
+            <circle cx="9" cy="9" r="7"/>
+            <path d="M9 7C9 5.9 9.9 5 11 5C12.1 5 13 5.9 13 7C13 8.5 11 9 9 10" stroke-linecap="round"/>
+            <circle cx="9" cy="12.5" r="0.8" fill="#9090aa" stroke="none"/>
+          </svg>
+          Other
+        </label>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="section-label">Additional Notes</div>
+    <textarea id="msg" placeholder="Anything unusual you noticed about this email…"></textarea>
+
+    <!-- Submit -->
+    <button class="btn-report" id="btn" onclick="submitReport()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1.5L2.5 4V8.5C2.5 11 4.5 13.2 7 14C9.5 13.2 11.5 11 11.5 8.5V4L7 1.5Z"
+              fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M4.5 7.5L6.3 9.3L9.5 5.8" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Report Suspicious Email
+    </button>
+    <div class="status" id="status"></div>
+
   </div>
 
-  <div class="section-label">Category</div>
-  <div class="radio-row">
-    <label class="radio-option">
-      <input type="radio" name="cat" value="Phish"> Phish
-    </label>
-    <label class="radio-option">
-      <input type="radio" name="cat" value="Spam"> Spam
-    </label>
-    <label class="radio-option">
-      <input type="radio" name="cat" value="Other" checked> Other
-    </label>
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <strong>CPX Cybersecurity</strong> &middot; Phishing Triage System
   </div>
-
-  <div class="section-label">Additional notes</div>
-  <textarea id="msg" placeholder="Anything unusual you noticed about this email…"></textarea>
-
-  <button class="btn-report" id="btn" onclick="submitReport()">Report</button>
-  <div class="status" id="status"></div>
 
   <script>
     // ── CONFIG ──────────────────────────────────────────────────
     // Set this to your Azure Function URL when ready.
     // Leave empty ("") for POC demo mode — shows simulated success.
-    const AZURE_FUNCTION_URL = "https://webhook.site/96fcb13e-74e6-478d-9a10-cc80a9ed9242";
+    const AZURE_FUNCTION_URL = "";
     // ────────────────────────────────────────────────────────────
 
     let emailData = {};
@@ -182,7 +473,7 @@
     });
 
     function loadEmailData() {
-      const item = Office.context.mailbox.item;
+      const item    = Office.context.mailbox.item;
       const profile = Office.context.mailbox.userProfile;
 
       emailData = {
@@ -203,23 +494,27 @@
         }))
       };
 
-      // Show preview card
       document.getElementById("prev-from").textContent =
-        emailData.from.name ? emailData.from.name + " <" + emailData.from.email + ">" : emailData.from.email || "—";
-      document.getElementById("prev-subject").textContent   = emailData.subject || "(no subject)";
-      document.getElementById("prev-attach").textContent    =
-        emailData.attachments.length ? emailData.attachments.map(a => a.name).join(", ") : "None";
+        emailData.from.name
+          ? emailData.from.name + " <" + emailData.from.email + ">"
+          : emailData.from.email || "—";
+      document.getElementById("prev-subject").textContent =
+        emailData.subject || "(no subject)";
+      document.getElementById("prev-attach").textContent =
+        emailData.attachments.length
+          ? emailData.attachments.map(a => a.name).join(", ")
+          : "None";
       document.getElementById("email-preview").style.display = "block";
 
-      // Get body HTML (for URL extraction by agent)
       item.body.getAsync(Office.CoercionType.Html, function(r) {
-        if (r.status === Office.AsyncResultStatus.Succeeded) emailData.bodyHtml = r.value;
+        if (r.status === Office.AsyncResultStatus.Succeeded)
+          emailData.bodyHtml = r.value;
       });
 
-      // Get all internet headers (SPF / DKIM / DMARC)
       if (item.getAllInternetHeadersAsync) {
         item.getAllInternetHeadersAsync(function(r) {
-          if (r.status === Office.AsyncResultStatus.Succeeded) emailData.internetHeaders = r.value;
+          if (r.status === Office.AsyncResultStatus.Succeeded)
+            emailData.internetHeaders = r.value;
         });
       }
     }
@@ -240,25 +535,26 @@
         email:       emailData
       };
 
-      // POC demo mode — no Azure Function configured yet
       if (!AZURE_FUNCTION_URL) {
         setTimeout(function() {
           showStatus("success",
-            "✓ Report submitted (POC demo mode). " +
-            "Category: " + category + ". " +
-            "In production this triggers AGT-CSD-006 phishing triage."
+            "✓ Report submitted (POC demo mode). Category: " + category +
+            ". In production this triggers AGT-CSD-006 phishing triage."
           );
-          btn.textContent = "Reported ✓";
-          btn.style.background = "#2d7d2d";
+          btn.innerHTML =
+            '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+            '<path d="M2.5 7L5.8 10.3L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg> Reported';
+          btn.style.background = "#1a6b38";
+          btn.style.color      = "#fff";
           console.log("POC payload:", JSON.stringify(payload, null, 2));
         }, 800);
         return;
       }
 
-      // Production mode — call Azure Function
       fetch(AZURE_FUNCTION_URL, {
         method:  "POST",
-        headers: { "Content-Type": "text/plain" },
+        headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(payload)
       })
       .then(function(r) {
@@ -270,13 +566,17 @@
           "✓ Report submitted (ID: " + (data.reportId || "—") + "). " +
           "The security team has been notified."
         );
-        btn.textContent = "Reported ✓";
-        btn.style.background = "#2d7d2d";
+        btn.innerHTML =
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+          '<path d="M2.5 7L5.8 10.3L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg> Reported';
+        btn.style.background = "#1a6b38";
+        btn.style.color      = "#fff";
       })
       .catch(function(err) {
         showStatus("error",
-          "Failed to submit: " + err.message + ". " +
-          "Please forward to security@cpx.ae as fallback."
+          "Failed to submit: " + err.message +
+          ". Please forward to security@cpx.ae as fallback."
         );
         btn.disabled = false;
       });
@@ -284,7 +584,7 @@
 
     function showStatus(type, msg) {
       var d = document.getElementById("status");
-      d.className = "status " + type;
+      d.className   = "status " + type;
       d.textContent = msg;
     }
   </script>
