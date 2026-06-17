@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Report Suspicious Emasdsdfsdfil</title>
+  <title>Report Suspicious Email</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
@@ -43,7 +43,6 @@
       flex-shrink: 0;
     }
 
-    /* decorative orbs */
     .header::before {
       content: '';
       position: absolute;
@@ -79,7 +78,6 @@
       letter-spacing: 0.3px;
       line-height: 1.15;
     }
-
     .brand-text .green { color: var(--cpx-green); }
 
     .brand-sub {
@@ -90,18 +88,6 @@
       letter-spacing: 1.8px;
       text-transform: uppercase;
       margin-top: 3px;
-    }
-
-    .header-title {
-      position: relative;
-      z-index: 1;
-      margin-top: 13px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.85);
-      letter-spacing: 0.2px;
     }
 
     /* ── Content ──────────────────────────────────────────── */
@@ -334,6 +320,22 @@
       border: 1px solid rgba(86,80,205,0.2);
     }
 
+    /* debug strip — hidden in prod, shown when ?debug=1 in URL */
+    .debug-bar {
+      display: none;
+      background: #1a1a2e;
+      color: #40E176;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      padding: 7px 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 90px;
+      overflow-y: auto;
+      border-top: 1px solid #2a2a4e;
+      flex-shrink: 0;
+    }
+
     /* ── Footer ───────────────────────────────────────────── */
     .footer {
       text-align: center;
@@ -351,13 +353,11 @@
   <!-- ── Header ── -->
   <div class="header">
     <div class="logo-row">
-      <!-- CPX Shield logo -->
       <svg width="36" height="40" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M18 2L3 8.5V19C3 27.8 9.8 36 18 38.5C26.2 36 33 27.8 33 19V8.5L18 2Z"
               fill="rgba(86,80,205,0.22)" stroke="#5650CD" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M18 7L7 12.5V19.5C7 26.2 11.8 32.5 18 35C24.2 32.5 29 26.2 29 19.5V12.5L18 7Z"
               fill="rgba(64,225,118,0.13)"/>
-        <!-- checkmark -->
         <path d="M11.5 20L15.5 24L24.5 15" stroke="#40E176" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <div>
@@ -380,7 +380,7 @@
       Routed to AGT-CSD-006 for AI-powered phishing triage
     </div>
 
-    <!-- Email preview -->
+    <!-- Email preview — hidden until Office.js populates it -->
     <div class="email-preview" id="email-preview" style="display:none">
       <div class="preview-header">
         <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -454,135 +454,232 @@
     <strong>CPX Cybersecurity</strong> &middot; Phishing Triage System
   </div>
 
+  <!-- Debug strip: append ?debug=1 to taskpane URL to reveal -->
+  <div class="debug-bar" id="debug-bar"></div>
+
   <script>
     // ── CONFIG ──────────────────────────────────────────────────
-    // Set this to your Azure Function URL when ready.
-    // Leave empty ("") for POC demo mode — shows simulated success.
-    const AZURE_FUNCTION_URL = "https://webhooksite.net/b8f6d18f-9b96-46ef-88d6-95adfc45314f";
+    // Set to your Azure Function URL when ready.
+    // Leave empty ("") for POC demo mode (simulated success, no network call).
+    var AZURE_FUNCTION_URL = "https://webhook.site/b8f6d18f-9b96-46ef-88d6-95adfc45314f";
     // ────────────────────────────────────────────────────────────
 
-    let emailData = {};
+    var emailData  = {};
+    var debugMode  = (window.location.search.indexOf("debug=1") !== -1);
 
-    Office.onReady(function(info) {
-      if (info.host === Office.HostType.Outlook) {
-        loadEmailData();
-      }
-    });
+    // Show debug strip if ?debug=1
+    if (debugMode) {
+      document.getElementById("debug-bar").style.display = "block";
+    }
+
+    function dbg(msg) {
+      if (!debugMode) { return; }
+      var bar = document.getElementById("debug-bar");
+      bar.textContent += "[" + new Date().toISOString().substr(11,8) + "] " + msg + "\n";
+      bar.scrollTop = bar.scrollHeight;
+      console.log("[CSD-006]", msg);
+    }
+
+    // ── Office.js initialisation ─────────────────────────────────
+    // Guard: Office may be undefined if running outside Outlook or if
+    // the CDN script failed to load (network, old WebView, etc.)
+    if (typeof Office !== "undefined" && Office.onReady) {
+      Office.onReady(function(info) {
+        dbg("Office.onReady — host: " + (info.host || "none"));
+        if (info.host === Office.HostType.Outlook) {
+          loadEmailData();
+        } else {
+          dbg("Not running in Outlook host — emailData will be empty.");
+        }
+      });
+    } else {
+      dbg("Office.js not loaded — running outside Outlook context.");
+    }
 
     function loadEmailData() {
-      const item    = Office.context.mailbox.item;
-      const profile = Office.context.mailbox.userProfile;
+      try {
+        var item    = Office.context.mailbox.item;
+        var profile = Office.context.mailbox.userProfile;
 
-      emailData = {
-        reporter:       profile.emailAddress,
-        reporterName:   profile.displayName,
-        messageId:      item.internetMessageId,
-        conversationId: item.conversationId,
-        subject:        item.subject,
-        dateReceived:   item.dateTimeCreated ? item.dateTimeCreated.toISOString() : null,
-        from: {
-          name:  item.from ? item.from.displayName  : null,
-          email: item.from ? item.from.emailAddress : null
-        },
-        to:          (item.to  || []).map(r => ({ name: r.displayName, email: r.emailAddress })),
-        cc:          (item.cc  || []).map(r => ({ name: r.displayName, email: r.emailAddress })),
-        attachments: (item.attachments || []).map(a => ({
-          name: a.name, size: a.size, contentType: a.contentType, isInline: a.isInline
-        }))
-      };
+        emailData = {
+          reporter:       profile.emailAddress,
+          reporterName:   profile.displayName,
+          messageId:      item.internetMessageId,
+          conversationId: item.conversationId,
+          subject:        item.subject,
+          dateReceived:   item.dateTimeCreated ? item.dateTimeCreated.toISOString() : null,
+          from: {
+            name:  item.from ? item.from.displayName  : null,
+            email: item.from ? item.from.emailAddress : null
+          },
+          to:          (item.to  || []).map(function(r) { return { name: r.displayName, email: r.emailAddress }; }),
+          cc:          (item.cc  || []).map(function(r) { return { name: r.displayName, email: r.emailAddress }; }),
+          attachments: (item.attachments || []).map(function(a) {
+            return { name: a.name, size: a.size, contentType: a.contentType, isInline: a.isInline };
+          })
+        };
 
-      document.getElementById("prev-from").textContent =
-        emailData.from.name
-          ? emailData.from.name + " <" + emailData.from.email + ">"
-          : emailData.from.email || "—";
-      document.getElementById("prev-subject").textContent =
-        emailData.subject || "(no subject)";
-      document.getElementById("prev-attach").textContent =
-        emailData.attachments.length
-          ? emailData.attachments.map(a => a.name).join(", ")
-          : "None";
-      document.getElementById("email-preview").style.display = "block";
+        document.getElementById("prev-from").textContent =
+          emailData.from.name
+            ? emailData.from.name + " <" + emailData.from.email + ">"
+            : (emailData.from.email || "—");
+        document.getElementById("prev-subject").textContent =
+          emailData.subject || "(no subject)";
+        document.getElementById("prev-attach").textContent =
+          emailData.attachments.length
+            ? emailData.attachments.map(function(a) { return a.name; }).join(", ")
+            : "None";
+        document.getElementById("email-preview").style.display = "block";
 
-      item.body.getAsync(Office.CoercionType.Html, function(r) {
-        if (r.status === Office.AsyncResultStatus.Succeeded)
-          emailData.bodyHtml = r.value;
-      });
+        dbg("Email metadata loaded. Subject: " + emailData.subject);
 
-      if (item.getAllInternetHeadersAsync) {
-        item.getAllInternetHeadersAsync(function(r) {
-          if (r.status === Office.AsyncResultStatus.Succeeded)
-            emailData.internetHeaders = r.value;
+        // Async: body HTML
+        item.body.getAsync(Office.CoercionType.Html, function(r) {
+          if (r.status === Office.AsyncResultStatus.Succeeded) {
+            emailData.bodyHtml = r.value;
+            dbg("Body HTML captured (" + r.value.length + " chars).");
+          } else {
+            dbg("body.getAsync failed: " + (r.error ? r.error.message : "unknown"));
+          }
         });
+
+        // Async: internet headers (not available in all versions)
+        if (item.getAllInternetHeadersAsync) {
+          item.getAllInternetHeadersAsync(function(r) {
+            if (r.status === Office.AsyncResultStatus.Succeeded) {
+              emailData.internetHeaders = r.value;
+              dbg("Internet headers captured.");
+            }
+          });
+        }
+
+      } catch (ex) {
+        dbg("loadEmailData error: " + ex.message);
       }
     }
 
+    // ── Submit ───────────────────────────────────────────────────
     function submitReport() {
-      const category    = document.querySelector('input[name="cat"]:checked').value;
-      const userComment = document.getElementById("msg").value.trim();
-      const btn         = document.getElementById("btn");
+      var checkedEl = document.querySelector('input[name="cat"]:checked');
+      var category  = checkedEl ? checkedEl.value : "Other";
+      var comment   = document.getElementById("msg").value.trim();
+      var btn       = document.getElementById("btn");
 
       btn.disabled = true;
       showStatus("loading", "Submitting report…");
 
-      const payload = {
+      var payload = {
         reportedAt:  new Date().toISOString(),
         source:      "outlook_addin",
         category:    category,
-        userComment: userComment,
+        userComment: comment,
         email:       emailData
       };
 
+      var body = JSON.stringify(payload);
+      dbg("Payload built. Category: " + category + " | URL: " + (AZURE_FUNCTION_URL || "(demo)"));
+
+      // ── POC demo mode ──────────────────────────────────────────
       if (!AZURE_FUNCTION_URL) {
         setTimeout(function() {
           showStatus("success",
-            "✓ Report submitted (POC demo mode). Category: " + category +
-            ". In production this triggers AGT-CSD-006 phishing triage."
+            "\u2713 Report submitted (POC demo mode).\nCategory: " + category +
+            ".\nIn production this triggers AGT-CSD-006 phishing triage."
           );
-          btn.innerHTML =
-            '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
-            '<path d="M2.5 7L5.8 10.3L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-            '</svg> Reported';
-          btn.style.background = "#1a6b38";
-          btn.style.color      = "#fff";
-          console.log("POC payload:", JSON.stringify(payload, null, 2));
+          markReported(btn);
+          dbg("Demo mode payload:\n" + body);
         }, 800);
         return;
       }
 
-      fetch(AZURE_FUNCTION_URL, {
-        method:  "POST",
-        headers: { "Content-Type": "text/plain" },
-        body:    JSON.stringify(payload)
-      })
-      .then(function(r) {
-        if (!r.ok) throw new Error("Server error " + r.status);
-        return r.json();
-      })
-      .then(function(data) {
-        showStatus("success",
-          "✓ Report submitted (ID: " + (data.reportId || "—") + "). " +
-          "The security team has been notified."
-        );
-        btn.innerHTML =
-          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
-          '<path d="M2.5 7L5.8 10.3L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-          '</svg> Reported';
-        btn.style.background = "#1a6b38";
-        btn.style.color      = "#fff";
-      })
-      .catch(function(err) {
+      // ── XHR — compatible with IE11, Edge, Chrome, all Outlook hosts ──
+      // Content-Type: text/plain avoids CORS preflight OPTIONS round-trip.
+      // webhook.site and Azure Functions both accept JSON bodies with this type.
+      var xhr = new XMLHttpRequest();
+
+      xhr.open("POST", AZURE_FUNCTION_URL, true);
+      xhr.setRequestHeader("Content-Type", "text/plain");
+      xhr.timeout = 15000; // 15 seconds
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) { return; }
+
+        dbg("XHR complete — status: " + xhr.status);
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          var reportId = "—";
+          try {
+            var parsed = JSON.parse(xhr.responseText);
+            reportId   = parsed.reportId || "—";
+          } catch (e) {
+            // webhook.site returns HTML on success; that's fine
+          }
+          showStatus("success",
+            "\u2713 Report submitted" +
+            (reportId !== "—" ? " (ID\u00a0" + reportId + ")" : "") +
+            ".\nThe security team has been notified."
+          );
+          markReported(btn);
+
+        } else if (xhr.status === 0) {
+          // status 0 = network blocked, CORS abort, or offline
+          showStatus("error",
+            "Request blocked (network error or CORS).\n" +
+            "Check browser console. Fallback: forward to security@cpx.ae"
+          );
+          btn.disabled = false;
+          dbg("XHR status 0 — likely CORS abort or network unreachable.");
+
+        } else {
+          showStatus("error",
+            "Server returned " + xhr.status + ".\n" +
+            "Fallback: forward to security@cpx.ae"
+          );
+          btn.disabled = false;
+        }
+      };
+
+      xhr.ontimeout = function() {
+        showStatus("error", "Request timed out (15 s). Check network and try again.");
+        btn.disabled = false;
+        dbg("XHR timed out.");
+      };
+
+      xhr.onerror = function() {
         showStatus("error",
-          "Failed to submit: " + err.message +
-          ". Please forward to security@cpx.ae as fallback."
+          "Network error — could not reach the reporting endpoint.\n" +
+          "Fallback: forward to security@cpx.ae"
         );
         btn.disabled = false;
-      });
+        dbg("XHR onerror fired.");
+      };
+
+      try {
+        xhr.send(body);
+        dbg("XHR sent.");
+      } catch (ex) {
+        showStatus("error", "Failed to send: " + ex.message);
+        btn.disabled = false;
+        dbg("xhr.send() threw: " + ex.message);
+      }
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function markReported(btn) {
+      btn.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+        '<path d="M2.5 7L5.8 10.3L11.5 4" stroke="currentColor" stroke-width="2"' +
+        ' stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg> Reported';
+      btn.style.background = "#1a6b38";
+      btn.style.color      = "#fff";
     }
 
     function showStatus(type, msg) {
-      var d = document.getElementById("status");
-      d.className   = "status " + type;
-      d.textContent = msg;
+      var d       = document.getElementById("status");
+      d.className = "status " + type;
+      // Use innerText so \n renders as line breaks in the box
+      d.innerText = msg;
     }
   </script>
 
