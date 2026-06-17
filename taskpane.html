@@ -501,13 +501,32 @@
         var item    = Office.context.mailbox.item;
         var profile = Office.context.mailbox.userProfile;
 
+        // ── Graph immutable item ID ──────────────────────────────
+        // item.itemId is EWS format. convertToRestId produces the
+        // stable Graph REST v2.0 ID needed for:
+        //   GET /users/{u}/messages/{graphItemId}/attachments/{attachmentId}/$value
+        //   POST /users/{u}/messages/{graphItemId}/move
+        // Keep internetMessageId alongside it — that's the RFC Message-ID
+        // used for org-wide search across mailboxes.
+        var graphItemId = null;
+        try {
+          graphItemId = Office.context.mailbox.convertToRestId(
+            item.itemId,
+            Office.MailboxEnums.RestVersion.v2_0
+          );
+          dbg("graphItemId resolved.");
+        } catch (ex) {
+          dbg("convertToRestId failed: " + ex.message + " — backend must resolve via Graph list.");
+        }
+
         emailData = {
-          reporter:       profile.emailAddress,
-          reporterName:   profile.displayName,
-          messageId:      item.internetMessageId,
-          conversationId: item.conversationId,
-          subject:        item.subject,
-          dateReceived:   item.dateTimeCreated ? item.dateTimeCreated.toISOString() : null,
+          reporter:           profile.emailAddress,
+          reporterName:       profile.displayName,
+          internetMessageId:  item.internetMessageId,   // RFC Message-ID — org-wide search key
+          graphItemId:        graphItemId,              // Graph REST v2.0 ID — attachment fetch / move / quarantine
+          conversationId:     item.conversationId,
+          subject:            item.subject,
+          dateReceived:       item.dateTimeCreated ? item.dateTimeCreated.toISOString() : null,
           from: {
             name:  item.from ? item.from.displayName  : null,
             email: item.from ? item.from.emailAddress : null
@@ -515,7 +534,8 @@
           to:          (item.to  || []).map(function(r) { return { name: r.displayName, email: r.emailAddress }; }),
           cc:          (item.cc  || []).map(function(r) { return { name: r.displayName, email: r.emailAddress }; }),
           attachments: (item.attachments || []).map(function(a) {
-            return { name: a.name, size: a.size, contentType: a.contentType, isInline: a.isInline };
+            // id is required by Graph: GET .../attachments/{id}/$value
+            return { id: a.id, name: a.name, size: a.size, contentType: a.contentType, isInline: a.isInline };
           })
         };
 
