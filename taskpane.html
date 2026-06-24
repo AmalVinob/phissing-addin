@@ -34,7 +34,6 @@
       flex-direction: column;
     }
 
-    /* ── Header ───────────────────────────────────────────── */
     .header {
       background: var(--dark-purple);
       padding: 18px 18px 16px;
@@ -42,7 +41,6 @@
       overflow: hidden;
       flex-shrink: 0;
     }
-
     .header::before {
       content: '';
       position: absolute;
@@ -61,7 +59,6 @@
       background: rgba(64, 225, 118, 0.14);
       pointer-events: none;
     }
-
     .logo-row {
       display: flex;
       align-items: center;
@@ -69,7 +66,6 @@
       position: relative;
       z-index: 1;
     }
-
     .brand-text {
       font-family: 'Unbounded', sans-serif;
       font-size: 17px;
@@ -79,7 +75,6 @@
       line-height: 1.15;
     }
     .brand-text .green { color: var(--cpx-green); }
-
     .brand-sub {
       font-family: 'Inter', sans-serif;
       font-size: 10px;
@@ -90,13 +85,8 @@
       margin-top: 3px;
     }
 
-    /* ── Content ──────────────────────────────────────────── */
-    .content {
-      padding: 15px 16px;
-      flex: 1;
-    }
+    .content { padding: 15px 16px; flex: 1; }
 
-    /* info bar */
     .info-bar {
       display: flex;
       align-items: flex-start;
@@ -113,7 +103,6 @@
     }
     .info-bar svg { flex-shrink: 0; margin-top: 1px; }
 
-    /* email preview card */
     .email-preview {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -122,7 +111,6 @@
       margin-bottom: 15px;
       box-shadow: 0 1px 4px rgba(30,27,71,0.07);
     }
-
     .preview-header {
       font-size: 9.5px;
       font-weight: 700;
@@ -134,7 +122,6 @@
       align-items: center;
       gap: 5px;
     }
-
     .email-preview .row {
       display: flex;
       gap: 8px;
@@ -142,7 +129,6 @@
       align-items: baseline;
     }
     .email-preview .row:last-child { margin-bottom: 0; }
-
     .email-preview .lbl {
       font-size: 10px;
       font-weight: 700;
@@ -152,7 +138,6 @@
       min-width: 48px;
       flex-shrink: 0;
     }
-
     .email-preview .val {
       font-size: 12px;
       white-space: nowrap;
@@ -162,7 +147,6 @@
       font-weight: 500;
     }
 
-    /* section labels */
     .section-label {
       font-size: 10px;
       font-weight: 700;
@@ -172,24 +156,9 @@
       margin-bottom: 9px;
     }
 
-    /* category cards */
-    .radio-group {
-      display: flex;
-      gap: 7px;
-      margin-bottom: 15px;
-    }
-
-    .radio-card {
-      flex: 1;
-      position: relative;
-    }
-
-    .radio-card input[type="radio"] {
-      position: absolute;
-      opacity: 0;
-      width: 0; height: 0;
-    }
-
+    .radio-group { display: flex; gap: 7px; margin-bottom: 15px; }
+    .radio-card { flex: 1; position: relative; }
+    .radio-card input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
     .radio-card label {
       display: flex;
       flex-direction: column;
@@ -207,10 +176,7 @@
       text-align: center;
       user-select: none;
     }
-
     .radio-card label svg { transition: all 0.15s ease; }
-
-    /* Phish — red */
     .radio-card input:checked + label.phish {
       border-color: var(--accent-red);
       background: rgba(255,54,102,0.06);
@@ -218,8 +184,6 @@
       box-shadow: 0 0 0 3px rgba(255,54,102,0.12);
     }
     .radio-card input:checked + label.phish svg { stroke: var(--accent-red); }
-
-    /* Spam — amber */
     .radio-card input:checked + label.spam {
       border-color: #F5A623;
       background: rgba(245,166,35,0.07);
@@ -227,8 +191,6 @@
       box-shadow: 0 0 0 3px rgba(245,166,35,0.15);
     }
     .radio-card input:checked + label.spam svg { stroke: #F5A623; }
-
-    /* Other — purple */
     .radio-card input:checked + label.other {
       border-color: var(--bright-purple);
       background: rgba(86,80,205,0.07);
@@ -237,7 +199,6 @@
     }
     .radio-card input:checked + label.other svg { stroke: var(--bright-purple); }
 
-    /* textarea */
     textarea {
       width: 100%;
       height: 78px;
@@ -260,7 +221,6 @@
     }
     textarea::placeholder { color: #c0c0d0; }
 
-    /* submit button */
     .btn-report {
       width: 100%;
       padding: 11px 12px;
@@ -291,7 +251,6 @@
       cursor: not-allowed;
     }
 
-    /* status */
     .status {
       margin-top: 11px;
       padding: 10px 12px;
@@ -320,7 +279,6 @@
       border: 1px solid rgba(86,80,205,0.2);
     }
 
-    /* debug strip — hidden in prod, shown when ?debug=1 in URL */
     .debug-bar {
       display: none;
       background: #1a1a2e;
@@ -336,7 +294,6 @@
       flex-shrink: 0;
     }
 
-    /* ── Footer ───────────────────────────────────────────── */
     .footer {
       text-align: center;
       padding: 10px 16px 13px;
@@ -350,7 +307,6 @@
 </head>
 <body>
 
-  <!-- ── Header ── -->
   <div class="header">
     <div class="logo-row">
       <svg width="36" height="40" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -367,10 +323,8 @@
     </div>
   </div>
 
-  <!-- ── Content ── -->
   <div class="content">
 
-    <!-- Info notice -->
     <div class="info-bar">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <circle cx="7" cy="7" r="6" stroke="#5650CD" stroke-width="1.2"/>
@@ -380,7 +334,6 @@
       Routed to AGT-CSD-006 for AI-powered phishing triage
     </div>
 
-    <!-- Email preview — hidden until Office.js populates it -->
     <div class="email-preview" id="email-preview" style="display:none">
       <div class="preview-header">
         <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -394,7 +347,6 @@
       <div class="row"><span class="lbl">Files</span><span class="val" id="prev-attach"></span></div>
     </div>
 
-    <!-- Category -->
     <div class="section-label">Category</div>
     <div class="radio-group">
       <div class="radio-card">
@@ -433,11 +385,9 @@
       </div>
     </div>
 
-    <!-- Notes -->
     <div class="section-label">Additional Notes</div>
     <textarea id="msg" placeholder="Anything unusual you noticed about this email…"></textarea>
 
-    <!-- Submit -->
     <button class="btn-report" id="btn" onclick="submitReport()">
       <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
         <path d="M2.5 2V13M2.5 2L12.5 5.5L2.5 9" stroke="currentColor" stroke-width="1.8"
@@ -449,25 +399,25 @@
 
   </div>
 
-  <!-- ── Footer ── -->
   <div class="footer">
     <strong>CPX Cybersecurity</strong> &middot; Phishing Triage System
   </div>
 
-  <!-- Debug strip: append ?debug=1 to taskpane URL to reveal -->
   <div class="debug-bar" id="debug-bar"></div>
 
   <script>
-    // ── CONFIG ──────────────────────────────────────────────────
-    // Set to your Azure Function URL when ready.
-    // Leave empty ("") for POC demo mode (simulated success, no network call).
+    // ── CONFIG ───────────────────────────────────────────────────
     var AZURE_FUNCTION_URL = "https://webhook.site/d0f23453-c89b-4a47-a13b-45689c39a763";
+    // Replace with your ngrok URL for local testing:
+    // var AZURE_FUNCTION_URL = "https://abc123.ngrok.io/api/report";
     // ────────────────────────────────────────────────────────────
 
-    var emailData  = {};
-    var debugMode  = (window.location.search.indexOf("debug=1") !== -1);
+    var emailData   = {};
+    var debugMode   = (window.location.search.indexOf("debug=1") !== -1);
 
-    // Show debug strip if ?debug=1
+    // ── CHANGE 1: outlookItem stored globally so submitReport() can call moveToAsync ──
+    var outlookItem = null;
+
     if (debugMode) {
       document.getElementById("debug-bar").style.display = "block";
     }
@@ -480,9 +430,6 @@
       console.log("[CSD-006]", msg);
     }
 
-    // ── Office.js initialisation ─────────────────────────────────
-    // Guard: Office may be undefined if running outside Outlook or if
-    // the CDN script failed to load (network, old WebView, etc.)
     if (typeof Office !== "undefined" && Office.onReady) {
       Office.onReady(function(info) {
         dbg("Office.onReady — host: " + (info.host || "none"));
@@ -501,13 +448,9 @@
         var item    = Office.context.mailbox.item;
         var profile = Office.context.mailbox.userProfile;
 
-        // ── Graph immutable item ID ──────────────────────────────
-        // item.itemId is EWS format. convertToRestId produces the
-        // stable Graph REST v2.0 ID needed for:
-        //   GET /users/{u}/messages/{graphItemId}/attachments/{attachmentId}/$value
-        //   POST /users/{u}/messages/{graphItemId}/move
-        // Keep internetMessageId alongside it — that's the RFC Message-ID
-        // used for org-wide search across mailboxes.
+        // ── CHANGE 2: save item reference globally for moveToAsync in submitReport ──
+        outlookItem = item;
+
         var graphItemId = null;
         try {
           graphItemId = Office.context.mailbox.convertToRestId(
@@ -522,8 +465,8 @@
         emailData = {
           reporter:           profile.emailAddress,
           reporterName:       profile.displayName,
-          internetMessageId:  item.internetMessageId,   // RFC Message-ID — org-wide search key
-          graphItemId:        graphItemId,              // Graph REST v2.0 ID — attachment fetch / move / quarantine
+          internetMessageId:  item.internetMessageId,
+          graphItemId:        graphItemId,
           conversationId:     item.conversationId,
           subject:            item.subject,
           dateReceived:       item.dateTimeCreated ? item.dateTimeCreated.toISOString() : null,
@@ -534,7 +477,6 @@
           to:          (item.to  || []).map(function(r) { return { name: r.displayName, email: r.emailAddress }; }),
           cc:          (item.cc  || []).map(function(r) { return { name: r.displayName, email: r.emailAddress }; }),
           attachments: (item.attachments || []).map(function(a) {
-            // id is required by Graph: GET .../attachments/{id}/$value
             return { id: a.id, name: a.name, size: a.size, contentType: a.contentType, isInline: a.isInline };
           })
         };
@@ -553,17 +495,19 @@
 
         dbg("Email metadata loaded. Subject: " + emailData.subject);
 
-        // Async: body HTML
+        // Async: body HTML — for URL extraction
         item.body.getAsync(Office.CoercionType.Html, function(r) {
           if (r.status === Office.AsyncResultStatus.Succeeded) {
             emailData.bodyHtml = r.value;
             dbg("Body HTML captured (" + r.value.length + " chars).");
           } else {
-            dbg("body.getAsync failed: " + (r.error ? r.error.message : "unknown"));
+            dbg("body.getAsync (html) failed: " + (r.error ? r.error.message : "unknown"));
           }
         });
 
-        // Async: body plain text — clean version for GPT-4o content scoring
+        // ── CHANGE 3: body plain text — clean text for GPT-4o content scoring ──
+        // Office.js strips all HTML tags for us — more reliable than doing it manually.
+        // The agent sends emailData.bodyText directly to GPT-4o.
         item.body.getAsync(Office.CoercionType.Text, function(r) {
           if (r.status === Office.AsyncResultStatus.Succeeded) {
             emailData.bodyText = r.value;
@@ -573,7 +517,7 @@
           }
         });
 
-        // Async: internet headers (not available in all versions)
+        // Async: internet headers
         if (item.getAllInternetHeadersAsync) {
           item.getAllInternetHeadersAsync(function(r) {
             if (r.status === Office.AsyncResultStatus.Succeeded) {
@@ -588,7 +532,6 @@
       }
     }
 
-    // ── Submit ───────────────────────────────────────────────────
     function submitReport() {
       var checkedEl = document.querySelector('input[name="cat"]:checked');
       var category  = checkedEl ? checkedEl.value : "Other";
@@ -609,7 +552,6 @@
       var body = JSON.stringify(payload);
       dbg("Payload built. Category: " + category + " | URL: " + (AZURE_FUNCTION_URL || "(demo)"));
 
-      // ── POC demo mode ──────────────────────────────────────────
       if (!AZURE_FUNCTION_URL) {
         setTimeout(function() {
           showStatus("success",
@@ -622,14 +564,10 @@
         return;
       }
 
-      // ── XHR — compatible with IE11, Edge, Chrome, all Outlook hosts ──
-      // Content-Type: text/plain avoids CORS preflight OPTIONS round-trip.
-      // webhook.site and Azure Functions both accept JSON bodies with this type.
       var xhr = new XMLHttpRequest();
-
       xhr.open("POST", AZURE_FUNCTION_URL, true);
       xhr.setRequestHeader("Content-Type", "text/plain");
-      xhr.timeout = 15000; // 15 seconds
+      xhr.timeout = 15000;
 
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4) { return; }
@@ -637,22 +575,44 @@
         dbg("XHR complete — status: " + xhr.status);
 
         if (xhr.status >= 200 && xhr.status < 300) {
+
+          // ── CHANGE 4: move email to Junk immediately after report is submitted ──
+          // This uses Office.js directly — no app registration, no Graph API needed.
+          // Works only for the reporter's own copy.
+          // moveToAsync requires manifest Mailbox requirement set 1.8 or higher.
+          if (outlookItem && outlookItem.moveToAsync) {
+            outlookItem.moveToAsync(
+              Office.MailboxEnums.MoveToFolderType.Junk,
+              function(moveResult) {
+                if (moveResult.status === Office.AsyncResultStatus.Succeeded) {
+                  dbg("Email moved to Junk via Office.js.");
+                } else {
+                  // Non-fatal — report was still submitted successfully
+                  dbg("moveToAsync failed: " + moveResult.error.message);
+                }
+              }
+            );
+          } else {
+            dbg("moveToAsync not available — Outlook version may not support it.");
+          }
+          // ── END OF CHANGE 4 ──────────────────────────────────
+
           var reportId = "—";
           try {
             var parsed = JSON.parse(xhr.responseText);
             reportId   = parsed.reportId || "—";
           } catch (e) {
-            // webhook.site returns HTML on success; that's fine
+            // webhook.site returns HTML — that is fine
           }
+
           showStatus("success",
             "\u2713 Report submitted" +
             (reportId !== "—" ? " (ID\u00a0" + reportId + ")" : "") +
-            ".\nThe security team has been notified."
+            ".\nEmail moved to Junk. Security team has been notified."
           );
           markReported(btn);
 
         } else if (xhr.status === 0) {
-          // status 0 = network blocked, CORS abort, or offline
           showStatus("error",
             "Request blocked (network error or CORS).\n" +
             "Check browser console. Fallback: forward to security@cpx.ae"
@@ -694,7 +654,6 @@
       }
     }
 
-    // ── Helpers ──────────────────────────────────────────────────
     function markReported(btn) {
       btn.innerHTML =
         '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
@@ -708,7 +667,6 @@
     function showStatus(type, msg) {
       var d       = document.getElementById("status");
       d.className = "status " + type;
-      // Use innerText so \n renders as line breaks in the box
       d.innerText = msg;
     }
   </script>
