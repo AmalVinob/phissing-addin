@@ -563,6 +563,16 @@
           }
         });
 
+        // Async: body plain text — clean version for GPT-4o content scoring
+        item.body.getAsync(Office.CoercionType.Text, function(r) {
+          if (r.status === Office.AsyncResultStatus.Succeeded) {
+            emailData.bodyText = r.value;
+            dbg("Body text captured (" + r.value.length + " chars).");
+          } else {
+            dbg("body.getAsync (text) failed: " + (r.error ? r.error.message : "unknown"));
+          }
+        });
+
         // Async: internet headers (not available in all versions)
         if (item.getAllInternetHeadersAsync) {
           item.getAllInternetHeadersAsync(function(r) {
